@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miran Lingo - Dil Öğren</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --green: #58cc02;
+            --dark-green: #46a302;
+            --blue: #1cb0f6;
+            --red: #ff4b4b;
+            --gray: #e5e5e5;
+            --text: #4b4b4b;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            margin: 0;
+            background-color: #ffffff;
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        /* Üst Menü / Status Bar */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+            gap: 20px;
+        }
+
+        .close-btn { font-size: 24px; cursor: pointer; color: #afafaf; font-weight: bold; }
+
+        .progress-bg {
+            flex-grow: 1;
+            height: 16px;
+            background: var(--gray);
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--green);
+            width: 10%;
+            border-radius: 10px;
+            transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .stats { display: flex; gap: 15px; font-weight: 900; }
+        .stat-heart { color: var(--red); }
+
+        /* Ana İçerik Alanı */
+        .main-container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 0 20px;
+            text-align: left;
+        }
+
+        h1 { font-size: 28px; font-weight: 900; margin-bottom: 30px; }
+
+        /* Soru Kartları */
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .option-card {
+            border: 2px solid var(--gray);
+            border-bottom: 5px solid var(--gray);
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.1s;
+            position: relative;
+        }
+
+        .option-card:hover { background: #f7f7f7; }
+
+        .option-card.selected {
+            background-color: #ddf4ff;
+            border-color: #84d8ff;
+            color: #1899d6;
+            border-bottom: 5px solid #84d8ff;
+        }
+
+        .option-card img { width: 100px; height: 100px; margin-bottom: 10px; }
+
+        /* Alt Kontrol Barı */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 120px;
+            border-top: 2px solid var(--gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            padding: 0 20px;
+        }
+
+        .check-btn {
+            width: 100%;
+            max-width: 400px;
+            background: var(--green);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 15px;
+            font-size: 20px;
+            font-weight: 900;
+            box-shadow: 0 5px 0 var(--dark-green);
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.1s;
+        }
+
+        .check-btn:active {
+            box-shadow: none;
+            transform: translateY(5px);
+        }
+
+        .check-btn.disabled {
+            background: #e5e5e5;
+            box-shadow: 0 5px 0 #afafaf;
+            cursor: not-allowed;
+            color: #afafaf;
+        }
+
+        /* Başarı Ekranı */
+        .success-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: white;
+            z-index: 1000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="close-btn">✕</div>
+    <div class="progress-bg">
+        <div class="progress-fill" id="pb"></div>
+    </div>
+    <div class="stats">
+        <span class="stat-heart">❤️ <span id="lives">5</span></span>
+    </div>
+</div>
+
+<div class="main-container" id="quiz-content">
+    <h1 id="question-title">Hangi seçenek "Köpek" anlamına gelir?</h1>
+    
+    <div class="options-container">
+        <div class="option-card" onclick="select(this, 'Apple')">
+            <img src="https://cdn-icons-png.flaticon.com/512/415/415733.png" alt="Apple">
+            <div>Apple</div>
+        </div>
+        <div class="option-card" onclick="select(this, 'Dog')">
+            <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" alt="Dog">
+            <div>Dog</div>
+        </div>
+        <div class="option-card" onclick="select(this, 'Cat')">
+            <img src="https://cdn-icons-png.flaticon.com/512/616/616430.png" alt="Cat">
+            <div>Cat</div>
+        </div>
+        <div class="option-card" onclick="select(this, 'Water')">
+            <img src="https://cdn-icons-png.flaticon.com/512/3105/3105807.png" alt="Water">
+            <div>Water</div>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    <button id="main-btn" class="check-btn disabled" onclick="check()">Kontrol Et</button>
+</div>
+
+<div id="finish-screen" class="success-overlay">
+    <h1 style="font-size: 50px;">🏆</h1>
+    <h1>Harikasın Miran!</h1>
+    <p>Bugünkü dersini tamamladın.</p>
+    <button class="check-btn" onclick="location.reload()" style="max-width: 200px;">TEKRAR OYNA</button>
+</div>
+
+<script>
+    let selected = null;
+    let score = 0;
+    let lives = 5;
+
+    function select(el, val) {
+        document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        selected = val;
+        document.getElementById('main-btn').classList.remove('disabled');
+    }
+
+    function check() {
+        if (!selected) return;
+
+        const btn = document.getElementById('main-btn');
+        
+        if (selected === "Dog") {
+            // Doğru Cevap
+            score += 25;
+            document.getElementById('pb').style.width = (score + 10) + "%";
+            
+            if (score >= 100) {
+                document.getElementById('finish-screen').style.display = 'flex';
+            } else {
+                alert("Doğru! Sıradaki soruya geçiyoruz.");
+                resetRound();
+            }
+        } else {
+            // Yanlış Cevap
+            lives--;
+            document.getElementById('lives').innerText = lives;
+            alert("Ah, bu yanlış! 'Dog' köpek demektir.");
+            if (lives <= 0) {
+                alert("Canın bitti! Baştan başlıyorsun.");
+                location.reload();
+            }
+        }
+    }
+
+    function resetRound() {
+        selected = null;
+        document.getElementById('main-btn').classList.add('disabled');
+        document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+        // Burada başlığı değiştirebilirsin
+        document.getElementById('question-title').innerText = "Hangi seçenek 'Elma' anlamına gelir?";
+    }
+</script>
+
+</body>
+</html>
